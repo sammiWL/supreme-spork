@@ -1,0 +1,52 @@
+frames 50
+basename sammi
+
+push
+move 250 250 0
+
+//spheres
+push
+rotate x 20
+rotate z 10
+rotate y 360 rotation
+sphere 200 0 0 10
+
+pop
+push
+rotate x 20
+rotate z 70
+rotate y 360 rotation
+sphere 0 0 200 10
+
+pop
+push
+rotate x 20
+rotate z 130
+rotate y 360 rotation
+sphere 0 0 200 10
+
+//big sphere
+pop
+push
+rotate x 360 rotation
+rotate y 360 rotation
+sphere 0 0 0 30
+
+//tori
+pop
+push
+rotate x 20
+
+push
+rotate z 10 
+torus 0 0 0 5 200 
+
+push
+rotate z 60
+torus 0 0 0 5 200 
+
+push
+rotate z 60
+torus 0 0 0 5 200
+
+vary rotation 0 49 0 1
