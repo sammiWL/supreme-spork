@@ -17,16 +17,10 @@ def add_polygon( points, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point( points, x1, y1, z1 )
     add_point( points, x2, y2, z2 )
 
-def scanline_conversion(screen, xt,yt,xm, ym, xb, yb, color):
+def scanline_conversion(screen, xb,yb,xm, ym, xt, yt, color):
     count = 0
-    #print "im trying"
-    #print yb
-    #print yt
-    #print xm
     while ((yb + count) < yt):
-        #print "UGH"
         delta0 = float((xt - xb) / (yt - yb))
-        
         if (yb + count) < ym :
             #print "ok"
             delta1 = float((xm - xb) / (ym - yb))
@@ -56,7 +50,7 @@ def draw_polygons( points, screen, color ):
     p = 0
     while p < len( points ) - 2:
         sorted_p = [points[p],points[p+1],points[p+2]]
-        sorted_p = sorted(sorted_p, key = lambda x:x[2])
+        sorted_p = sorted(sorted_p, key = lambda x: (x[1]))
         
         scanline_conversion(screen,
                             sorted_p[0][0],sorted_p[0][1],
