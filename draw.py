@@ -22,23 +22,23 @@ def scanline_conversion(screen, xb,yb,xm, ym, xt, yt, color):
     while ((yb + count) < yt):
         delta0 = float((xt - xb) / (yt - yb))
         if (yb + count) < ym :
-            #print "ok"
             delta1 = float((xm - xb) / (ym - yb))
             draw_line(screen,
-                      xb + count * delta0,
-                      yb + count,
                       xb + count * delta1,
+                      yb + count,
+                      xb + count * delta0,
                       yb + count,
                       color)
         else:
             delta3 = float((xt - xm) / (yt - ym))
             draw_line(screen,
-                      xb + count * delta0,
-                      yb + count,
                       xm + (count - ym + yb) * delta3,
+                      yb + count,
+                      xb + count * delta0,
                       yb + count,
                       color)
         count += 1
+    
 
         
 def draw_polygons( points, screen, color ):
@@ -48,23 +48,23 @@ def draw_polygons( points, screen, color ):
         return
 
     p = 0
-    while p < len( points ) - 2:
-        sorted_p = [points[p],points[p+1],points[p+2]]
-        sorted_p = sorted(sorted_p, key = lambda x: (x[1]))
-        
-        scanline_conversion(screen,
-                            sorted_p[0][0],sorted_p[0][1],
-                            sorted_p[1][0],sorted_p[1][1],
-                            sorted_p[2][0],sorted_p[2][1],
-                            colors[p % 5])
-                      
+    while p < len( points ) - 2:          
         if calculate_dot( points, p ) < 0:
+            sorted_p = sorted([points[p],points[p+1],points[p+2]], key = lambda x: (x[1], -x[2]))
+            color = colors[p % 5]         
+            scanline_conversion(screen,
+                                sorted_p[0][0],sorted_p[0][1],
+                                sorted_p[1][0],sorted_p[1][1],
+                                sorted_p[2][0],sorted_p[2][1],
+                                 color)
+            
             draw_line( screen, points[p][0], points[p][1],
                        points[p+1][0], points[p+1][1], color )
             draw_line( screen, points[p+1][0], points[p+1][1],
                        points[p+2][0], points[p+2][1], color )
             draw_line( screen, points[p+2][0], points[p+2][1],
                        points[p][0], points[p][1], color )
+           
         p+= 3
 
 
