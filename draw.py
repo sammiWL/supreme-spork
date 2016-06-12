@@ -17,7 +17,7 @@ def add_polygon( points, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point( points, x1, y1, z1 )
     add_point( points, x2, y2, z2 )
 
-def scanline_conversion(screen, xb,yb,xm, ym, xt, yt, color):
+def scanline_conversion(screen, xb,yb, zb, xm, ym, zm,  xt, yt, zt, color, z_buffer):
     count = 0
     while ((yb + count) < yt):
         delta0 = float((xt - xb) / (yt - yb))
@@ -26,22 +26,24 @@ def scanline_conversion(screen, xb,yb,xm, ym, xt, yt, color):
             draw_line(screen,
                       xb + count * delta1,
                       yb + count,
+                      min(zb, zm, zt),
                       xb + count * delta0,
                       yb + count,
-                      color)
+                      min(zb, zm, zt),
+                      color, z_buffer)
         else:
             delta3 = float((xt - xm) / (yt - ym))
             draw_line(screen,
                       xm + (count - ym + yb) * delta3,
                       yb + count,
+                      min(zb, zm, zt),
                       xb + count * delta0,
                       yb + count,
-                      color)
+                      min(zb, zm, zt),
+                      color, z_buffer)
         count += 1
-    
-
         
-def draw_polygons( points, screen, color ):
+def draw_polygons( points, screen, color, z_buffer):
 
     if len(points) < 3:
         print 'Need at least 3 points to draw a polygon!'
@@ -51,19 +53,20 @@ def draw_polygons( points, screen, color ):
     while p < len( points ) - 2:          
         if calculate_dot( points, p ) < 0:
             sorted_p = sorted([points[p],points[p+1],points[p+2]], key = lambda x: (x[1], -x[2]))
-            color = colors[p % 5]         
+            color = colors[p % 5]
+            #color = colors[0]
             scanline_conversion(screen,
-                                sorted_p[0][0],sorted_p[0][1],
-                                sorted_p[1][0],sorted_p[1][1],
-                                sorted_p[2][0],sorted_p[2][1],
-                                 color)
+                                sorted_p[0][0],sorted_p[0][1],sorted_p[0][2],
+                                sorted_p[1][0],sorted_p[1][1],sorted_p[1][2],
+                                sorted_p[2][0],sorted_p[2][1],sorted_p[2][2],
+                                 color, z_buffer)
             
-            draw_line( screen, points[p][0], points[p][1],
-                       points[p+1][0], points[p+1][1], color )
-            draw_line( screen, points[p+1][0], points[p+1][1],
-                       points[p+2][0], points[p+2][1], color )
-            draw_line( screen, points[p+2][0], points[p+2][1],
-                       points[p][0], points[p][1], color )
+            draw_line( screen, points[p][0], points[p][1], points[p][2],
+                       points[p+1][0], points[p+1][1], points[p+1][2], color, z_buffer )
+            draw_line( screen, points[p+1][0], points[p+1][1], points[p+1][2],
+                       points[p+2][0], points[p+2][1], points[p+2][2], color , z_buffer)
+            draw_line( screen, points[p+2][0], points[p+2][1], points[p+2][2],
+                       points[p][0], points[p][1], points[p][2], color , z_buffer)
            
         p+= 3
 
@@ -329,9 +332,12 @@ def add_point( matrix, x, y, z=0 ):
     matrix.append( [x, y, z, 1] )
 
 
-def draw_line( screen, x0, y0, x1, y1, color ):
+def draw_line( screen, x0, y0, z0, x1, y1, z1, color, z_buffer ):
     dx = x1 - x0
     dy = y1 - y0
+    dz = z1 - z0
+    if (dx ** 2 + dy ** 2) != 0:
+        dz = (z1 - z0) / (dx * dx + dy * dy) ** (0.5)
     if dx + dy < 0:
         dx = 0 - dx
         dy = 0 - dy
@@ -341,23 +347,25 @@ def draw_line( screen, x0, y0, x1, y1, color ):
         tmp = y0
         y0 = y1
         y1 = tmp
+        
+    tmp_z = z0
     
     if dx == 0:
         y = y0
         while y <= y1:
-            plot(screen, color,  x0, y)
+            plot(screen, color,  x0, y, tmp_z,  z_buffer)
             y = y + 1
     elif dy == 0:
         x = x0
         while x <= x1:
-            plot(screen, color, x, y0)
+            plot(screen, color, x, y0, tmp_z, z_buffer)
             x = x + 1
     elif dy < 0:
         d = 0
         x = x0
         y = y0
         while x <= x1:
-            plot(screen, color, x, y)
+            plot(screen, color, x, y, tmp_z, z_buffer)
             if d > 0:
                 y = y - 1
                 d = d - dx
@@ -368,7 +376,7 @@ def draw_line( screen, x0, y0, x1, y1, color ):
         x = x0
         y = y0
         while y <= y1:
-            plot(screen, color, x, y)
+            plot(screen, color, x, y, tmp_z, z_buffer)
             if d > 0:
                 x = x - 1
                 d = d - dy
@@ -379,21 +387,23 @@ def draw_line( screen, x0, y0, x1, y1, color ):
         x = x0
         y = y0
         while x <= x1:
-            plot(screen, color, x, y)
+            plot(screen, color, x, y, tmp_z, z_buffer)
             if d > 0:
                 y = y + 1
                 d = d - dx
             x = x + 1
             d = d + dy
+            tmp_z += dz
     else:
         d = 0
         x = x0
         y = y0
         while y <= y1:
-            plot(screen, color, x, y)
+            plot(screen, color, x, y, tmp_z, z_buffer)
             if d > 0:
                 x = x + 1
                 d = d - dy
             y = y + 1
             d = d + dx
+            tmp_z += dz
 
