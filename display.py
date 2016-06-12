@@ -1,6 +1,6 @@
 from subprocess import Popen, PIPE
 from os import remove
-import sys
+
 #constants
 XRES = 500
 YRES = 500
@@ -11,37 +11,31 @@ BLUE = 2
 
 DEFAULT_COLOR = [0, 0, 0]
 
-def new_screen( width = XRES, height = YRES ):
+def new_screen(width = XRES, height = YRES, default=DEFAULT_COLOR):
     screen = []
-    for y in range( height ):
-        row = []
-        screen.append( row )
-        for x in range( width ):
-            screen[y].append( DEFAULT_COLOR[:] )
-    return screen
-
-def make_z_buffer( width = XRES, height = YRES):
-    z_buffer  = []
     for y in range(height):
         row = []
-        z_buffer.append(row)
+        screen.append(row)
         for x in range(width):
-            z_buffer[y].append(-sys.maxint - 1)
-    return z_buffer
+            screen[y].append(default[:])
+    return screen
 
-def plot( screen, color, x, y, z, z_buffer):
+
+def plot(screen, color, z_buffer, x, y, z):
     x = int(x)
     y = int(y)
-    #z = int(z)
     newy = YRES - 1 - y
-    if ( x >= 0 and x < XRES and newy >= 0 and newy < YRES and z > z_buffer[x][y]):
+    if (x >= 0 and x < XRES and
+        newy >= 0 and newy < YRES
+        and z >= z_buffer[x][newy][0]):
+        z_buffer[x][newy][0] = z
         screen[x][newy] = color[:]
-        z_buffer[x][y] = z
 
-def clear_screen( screen ):
-    for y in range( len(screen) ):
-        for x in range( len(screen[y]) ):
-            screen[x][y] = DEFAULT_COLOR[:]
+        
+def clear_screen(screen, default=DEFAULT_COLOR):
+    for y in range(len(screen)):
+        for x in range(len(screen[y])):
+            screen[x][y] = default[:]
 
 def save_ppm( screen, fname ):
     f = open( fname, 'w' )
