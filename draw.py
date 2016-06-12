@@ -26,20 +26,20 @@ def scanline_conversion(screen, xb,yb, zb, xm, ym, zm,  xt, yt, zt, color, z_buf
             draw_line(screen,
                       xb + count * delta1,
                       yb + count,
-                      min(zb, zm, zt),
+                      max(zb, zm, zt),
                       xb + count * delta0,
                       yb + count,
-                      min(zb, zm, zt),
+                      max(zb, zm, zt),
                       color, z_buffer)
         else:
             delta3 = float((xt - xm) / (yt - ym))
             draw_line(screen,
                       xm + (count - ym + yb) * delta3,
                       yb + count,
-                      min(zb, zm, zt),
+                      max(zb, zm, zt),
                       xb + count * delta0,
                       yb + count,
-                      min(zb, zm, zt),
+                      max(zb, zm, zt),
                       color, z_buffer)
         count += 1
         
