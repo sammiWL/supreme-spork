@@ -1,25 +1,15 @@
 from display import *
 from matrix import *
-from gmath import calculate_dot
+from gmath import *
 from math import cos, sin, pi
 
 MAX_STEPS = 100
 colors = [
-    [ 82,  72, 156],
-    [ 64,  98, 187],
-    [ 89, 195, 195],
-    [235, 235, 235],
-    [244,  91, 105]
-    # [238,  64,  53],
-    # [243, 119,  54],
-    # [253, 244, 152],
-    # [123, 192,  67],
-    # [  3, 146, 207],
-    # [250, 205, 205],
-    # [248, 250, 205],
-    # [210, 250, 205],
-    # [205, 250, 236],
-    # [236, 205, 250]
+    [255,89,94],
+    [255,202,58],
+    [138,201,38],
+    [25,130,196],
+    [137,33,186]   
 ]
 
 
@@ -53,6 +43,52 @@ def add_polygon(points, x0, y0, z0, x1, y1, z1, x2, y2, z2):
     add_point(points, x1, y1, z1)
     add_point(points, x2, y2, z2)
 
+
+def normalization(vector):
+    ax = 0
+    ay = 0
+    az = 0
+    (ax, ay, az) = vector
+    mag = (ax ** 2 + ay ** 2 + az ** 2) ** (.5)
+    return [(ax/mag), (ay/mag), (az/mag)]
+
+def flat_shading(points, p):
+    c_am = [0, 255, 255]
+    k_am = .6
+    i_am = [k_am * x for x in c_am]
+    
+    c_ref = [255, 255, 255]
+
+    k_dif = .4
+    k_spec = 0
+
+    light_loc = [50, 50, 0]
+    light_norm = normalization(light_loc)
+    
+    normal = normalization(calculate_normal(points[p + 1][0] - points[ p ][0],
+                                            points[p + 1][1] - points[ p ][1],
+                                            points[p + 1][2] - points[ p ][2],
+                                            points[p + 2][0] - points[ p ][0],
+                                            points[p + 2][1] - points[ p ][1],
+                                            points[p + 2][2] - points[ p ][2]))
+
+    costheta = (light_norm[0] * normal[0]) + (light_norm[1] * normal[1]) + (light_norm[2] * normal[2])
+    
+    i_dif = [max(0, int(k_dif * costheta * x)) for x in c_ref]
+
+    #print i_dif
+    
+    #print costheta
+    #print "COST THETA\n\n\n"
+    #print normalization(normal)
+    #print "normal down vv"
+    #print normal
+    color = [int(i_am[i] +  i_dif[i]) for i in range(3)]
+    #print color
+    return color
+
+
+
     
 def draw_polygons(points, screen, z_buffer, color):
     if len(points) < 3:
@@ -61,20 +97,13 @@ def draw_polygons(points, screen, z_buffer, color):
     p = 0
     while p < len(points) - 2:
         if calculate_dot( points, p ) < 0:
-            top = 0
-            bottom = 0
-            for i in range(2):
-                if points[p + i + 1][1] > points[p + top][1]:
-                    top = i + 1
-                if points[p + i + 1][1] < points[p + bottom][1]:
-                    bottom = i + 1
-            middle = 3 - top - bottom
+            sorted_p = sorted([points[p],points[p+1],points[p+2]], key = lambda x: (x[1], -x[2]))
+            color = flat_shading(points, p)
             scanline_conversion(screen,
-                                points[p+top][0], points[p+top][1], points[p+top][2],
-                                points[p+middle][0], points[p+middle][1], points[p+middle][2],
-                                points[p+bottom][0], points[p+bottom][1], points[p+bottom][2],
-                                z_buffer, colors[p / 3 % len(colors)])
-            color = colors[p / 3 % len(colors)]
+                                sorted_p[2][0],sorted_p[2][1],sorted_p[2][2],
+                                sorted_p[1][0],sorted_p[1][1],sorted_p[1][2],
+                                sorted_p[0][0],sorted_p[0][1],sorted_p[0][2],
+                                z_buffer, color)
             draw_line(screen, points[p][0], points[p][1], points[p][2],
                       points[p+1][0], points[p+1][1], points[p+1][2],
                       z_buffer, color)
