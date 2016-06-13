@@ -52,6 +52,16 @@ def normalization(vector):
     mag = (ax ** 2 + ay ** 2 + az ** 2) ** (.5)
     return [(ax/mag), (ay/mag), (az/mag)]
 
+def calculate_light_dot(vector1, vector2):
+    return (vector1[0] * vector2[0]) + (vector1[1] * vector2[1]) + (vector1[2] *  vector2[2]) 
+
+    
+def cos_alpha_calc(normal, light, view):
+    ans = calculate_light_dot(normal, light)
+    ans = [(2 * normal[i]  * ans - light[i]) for i in range(3)]
+    ans = calculate_light_dot(ans, view)    
+    return ans
+
 def flat_shading(points, p):
     c_am = [0, 255, 255]
     k_am = .6
@@ -59,10 +69,10 @@ def flat_shading(points, p):
     
     c_ref = [255, 255, 255]
 
-    k_dif = .4
-    k_spec = 0
+    k_dif = 0
+    k_spec = .4
 
-    light_loc = [50, 50, 0]
+    light_loc = [100, 100, 50 ]
     light_norm = normalization(light_loc)
     
     normal = normalization(calculate_normal(points[p + 1][0] - points[ p ][0],
@@ -72,18 +82,13 @@ def flat_shading(points, p):
                                             points[p + 2][1] - points[ p ][1],
                                             points[p + 2][2] - points[ p ][2]))
 
-    costheta = (light_norm[0] * normal[0]) + (light_norm[1] * normal[1]) + (light_norm[2] * normal[2])
-    
-    i_dif = [max(0, int(k_dif * costheta * x)) for x in c_ref]
+    cos_dif = calculate_light_dot(normal, light_norm)     
+    i_dif = [min(max(0, int(k_dif * cos_dif * x)), 255) for x in c_ref]
 
-    #print i_dif
-    
-    #print costheta
-    #print "COST THETA\n\n\n"
-    #print normalization(normal)
-    #print "normal down vv"
-    #print normal
-    color = [int(i_am[i] +  i_dif[i]) for i in range(3)]
+    cos_spec = cos_alpha_calc(normal, light_norm, [0, 0, 5])
+    i_spec = [min(max(0, int(k_spec * cos_spec * x)), 255) for x in c_ref]
+            
+    color = [int(i_am[i] +  i_dif[i] + i_spec[i]) for i in range(3)]
     #print color
     return color
 
