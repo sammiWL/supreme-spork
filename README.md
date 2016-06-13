@@ -1,6 +1,4 @@
-# supreme-spork
-A Final Project with Sammi and Bi Ling 
-
+# Supreme-Spork
 #Members 
 
 | Name              | Github                                   |
