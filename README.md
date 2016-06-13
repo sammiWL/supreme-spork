@@ -10,3 +10,8 @@ A Final Project with Sammi and Bi Ling
 
 #How to Run
 `make final`
+
+#What We Did
+* Scanline Conversion
+* Z-Buffering
+* Flat Shading
