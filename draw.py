@@ -63,14 +63,15 @@ def cos_alpha_calc(normal, light, view):
     return ans
 
 def flat_shading(points, p):
-    c_am = [0, 255, 255]
-    k_am = .6
+    c_am = [0, 0, 255]
+    k_am = .5
     i_am = [k_am * x for x in c_am]
     
-    c_ref = [255, 255, 255]
-
-    k_dif = 0
-    k_spec = .4
+    c_dif = [255, 0, 0]
+    c_spec = [255, 255, 255]
+    
+    k_dif = .4
+    k_spec = .1
 
     light_loc = [100, 100, 50 ]
     light_norm = normalization(light_loc)
@@ -83,10 +84,10 @@ def flat_shading(points, p):
                                             points[p + 2][2] - points[ p ][2]))
 
     cos_dif = calculate_light_dot(normal, light_norm)     
-    i_dif = [min(max(0, int(k_dif * cos_dif * x)), 255) for x in c_ref]
+    i_dif = [min(max(0, int(k_dif * cos_dif * x)), 255) for x in c_dif]
 
     cos_spec = cos_alpha_calc(normal, light_norm, [0, 0, 5])
-    i_spec = [min(max(0, int(k_spec * cos_spec * x)), 255) for x in c_ref]
+    i_spec = [min(max(0, int(k_spec * cos_spec * x)), 255) for x in c_spec]
             
     color = [int(i_am[i] +  i_dif[i] + i_spec[i]) for i in range(3)]
     #print color
@@ -233,6 +234,7 @@ def add_sphere( points, cx, cy, cz, r, step ):
             
             longt+= 1
         lat+= 1
+
 
 def generate_sphere( points, cx, cy, cz, r, step ):
 
